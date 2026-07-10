@@ -13,11 +13,11 @@ const faqs = [
   },
   {
     q: '文章是怎么写的？',
-    a: '全部用 Markdown 撰写，通过 Vite 的 import.meta.glob 自动收集，渲染则交给 react-markdown。',
+    a: '全部用 Markdown 撰写，通过 Vite 的 import.meta.glob 自动收集，渲染则交给 react-markdown，目前由WorkBuddy维护，UI使用animal-island-ui。',
   },
   {
     q: '可以转载文章吗？',
-    a: '欢迎非商业地转载，只需保留署名与原文链接即可。商用请联系我。',
+    a: '欢迎非商业地转载，只需保留署名与原文链接即可。',
   },
 ];
 
@@ -41,7 +41,7 @@ export function About() {
           <div>
             <h3 className="about-card__name">{AUTHORS[DEFAULT_AUTHOR].name}</h3>
             <p className="about-card__bio">
-              一名喜欢前端与开源的开发者，日常在浏览器的小岛上「钓鱼、挖化石、布置家园」。
+              一名喜欢Agent与开源的开发者，日常在浏览器的小岛上「钓鱼、挖化石、布置家园」。
               这里是我把知识落地的后花园。
             </p>
           </div>

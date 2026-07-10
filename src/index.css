@@ -1165,7 +1165,7 @@ a {
 /* —— 全站自定义光标（动物森友会风格手指）——
    注：animal-island-ui 自带的 Cursor 组件其 cursor.css 在「生产构建」中会被丢弃。
    因此光标图(cursor-icon.png)放入 src/assets 由 Vite 打包，用相对 url() 引用，
-   Vite 会自动按 base(本地 /、GitHub Pages /my_blog/) 重写路径，dev 与 build 均正确。
+   Vite 会自动按 base(本地 /、GitHub Pages /island-notes/) 重写路径，dev 与 build 均正确。
    配合 <Cursor> 包裹的 .animal-cursor--force 使用。 */
 html,
 body,

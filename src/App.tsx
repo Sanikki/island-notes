@@ -7,8 +7,8 @@ import { About } from './pages/About';
 import { Splash } from './pages/Splash';
 
 export default function App() {
-  // GitHub Pages 项目页部署在子路径 /my_blog/ 下：
-  // import.meta.env.BASE_URL 生产为 /my_blog/、dev 为 /，去掉尾斜杠作为 router basename。
+  // GitHub Pages 项目页部署在子路径 /island-notes/ 下：
+  // import.meta.env.BASE_URL 生产为 /island-notes/、dev 为 /，去掉尾斜杠作为 router basename。
   const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
   return (
     <BrowserRouter basename={basename}>

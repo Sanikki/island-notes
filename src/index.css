@@ -46,7 +46,7 @@ body {
   color: var(--ai-ink);
   /* 官方展示站同款内容页背景（demo/img/content_bg_pc.jpg，平铺图案） */
   background-color: #e7f3e2;
-  background-image: url("/bg/content_bg_pc.jpg");
+  background-image: url("./assets/bg/content_bg_pc.jpg");
   background-repeat: repeat;
   background-position: center;
   background-size: auto;
@@ -88,7 +88,7 @@ a {
   /* 官方展示站同款菜单背景（demo/img/menu_bg.svg），叠加半透明白底保证文字可读 */
   background:
     linear-gradient(rgba(255, 252, 240, 0.74), rgba(255, 252, 240, 0.74)),
-    url("/bg/menu_bg.svg") center / auto repeat;
+    url("./assets/bg/menu_bg.svg") center / auto repeat;
   border-bottom: 3px solid rgba(25, 200, 185, 0.45);
 }
 
@@ -155,7 +155,7 @@ a {
   padding: 40px 28px 36px;
   border-radius: 28px;
   /* 官方展示站同款首页背景（demo/img/home_bg.webp，平铺 + 慢滚动） */
-  background: url("/bg/home_bg.webp") 0 0 / auto repeat, #7dc395;
+  background: url("./assets/bg/home_bg.webp") 0 0 / auto repeat, #7dc395;
   animation: bgScroll 80s linear infinite;
   box-shadow: 0 10px 0 rgba(70, 120, 80, 0.18),
     0 18px 40px rgba(40, 90, 50, 0.18);
@@ -869,7 +869,7 @@ a {
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  background: url("/bg/home_bg.webp") 0 0 / auto repeat, #7dc395;
+  background: url("./assets/bg/home_bg.webp") 0 0 / auto repeat, #7dc395;
   animation: ai-scroll 80s linear infinite;
 }
 
@@ -1163,13 +1163,13 @@ a {
 }
 
 /* —— 全站自定义光标（动物森友会风格手指）——
-   注：animal-island-ui 自带的 Cursor 组件其 cursor.css 在「生产构建」中会被丢弃
-   （光标图不会拷贝进 dist/assets，url(...) 规则也不进打包 CSS），仅在 dev 临时生效。
-   因此这里自行定义规则，并指向 public/cursor-icon.png（构建时会自动随 public 拷贝），
-   保证 dev 与 build 两种环境都能正确显示。配合 <Cursor> 包裹的 .animal-cursor--force 使用。 */
+   注：animal-island-ui 自带的 Cursor 组件其 cursor.css 在「生产构建」中会被丢弃。
+   因此光标图(cursor-icon.png)放入 src/assets 由 Vite 打包，用相对 url() 引用，
+   Vite 会自动按 base(本地 /、GitHub Pages /my_blog/) 重写路径，dev 与 build 均正确。
+   配合 <Cursor> 包裹的 .animal-cursor--force 使用。 */
 html,
 body,
 .animal-cursor--force,
 .animal-cursor--force * {
-  cursor: url(/cursor-icon.png) 4 0, default !important;
+  cursor: url("./assets/cursor-icon.png") 4 0, default !important;
 }

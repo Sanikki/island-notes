@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import animalIcon from '../assets/bg/animal_icon.png';
 import {
   Button,
   Card,
@@ -76,7 +77,7 @@ export function Splash() {
           </div>
           <div className="landing__hero-art">
             <img
-              src="/bg/animal_icon.png"
+              src={animalIcon}
               alt="动物森友会小岛"
               className="landing__art-img"
               decoding="async"

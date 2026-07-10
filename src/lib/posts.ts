@@ -1,5 +1,6 @@
 import yaml from 'js-yaml';
 import GithubSlugger from 'github-slugger';
+import avatarSanikki from '../assets/bg/avatar_sanikki.jpg';
 
 export interface PostMeta {
   slug: string;
@@ -162,7 +163,7 @@ export function extractToc(markdown: string): TocItem[] {
 export const AUTHORS: Record<string, { name: string; avatar: string }> = {
   SANIKKI: {
     name: 'SANIKKI',
-    avatar: '/bg/avatar_sanikki.jpg',
+    avatar: avatarSanikki,
   },
 };
 

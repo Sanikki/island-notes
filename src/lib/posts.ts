@@ -117,8 +117,17 @@ export function getAllTags(): TagInfo[] {
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }
 
+// 标签分组：一个菜单/分类聚合多个近义标签。
+// 例：导航「Agent」聚合 AI / Agent / AI Agent 三者的文章，
+// 但单独点 AI、AI Agent 标签卡片时仍只显示各自精确结果。
+export const TAG_GROUPS: Record<string, string[]> = {
+  Agent: ['AI', 'Agent', 'AI Agent'],
+};
+
 export function getPostsByTag(tag: string): Post[] {
-  return posts.filter((p) => p.tags.includes(tag));
+  const group = TAG_GROUPS[tag];
+  const tagsToMatch = group ?? [tag];
+  return posts.filter((p) => p.tags.some((t) => tagsToMatch.includes(t)));
 }
 
 export interface TocItem {

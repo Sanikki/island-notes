@@ -1,7 +1,7 @@
 ---
 title: MCP 心法：号令天下工具的武林盟主令
 date: 2026-07-10
-tags: [MCP, AI Agent, 协议, 笔记]
+tags: [MCP, AI Agent, 协议, Agent]
 excerpt: 用武侠比喻讲透 MCP——三层架构、三大法器、两条密道，以及它和 Function Calling 的分工。
 author: SANIKKI
 cover: ''

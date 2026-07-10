@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sanikki.github.io/island-notes/sitemap.xml

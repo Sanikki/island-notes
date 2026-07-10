@@ -1,7 +1,7 @@
 ---
 title: MCP 与 Function Calling 的区别
 date: 2026-07-10
-tags: [AI Agent, MCP, 笔记]
+tags: [AI Agent, MCP, Agent, Function Calling]
 excerpt: 用「嘴与筋脉」的比喻讲清 Function Calling 和 MCP 的分层关系——前者是模型说出的意图，后者是把意图送达工具的传输通道。
 author: SANIKKI
 cover: ''

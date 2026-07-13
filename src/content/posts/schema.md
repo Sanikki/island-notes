@@ -3,7 +3,7 @@ title: 《Schema——数据格式的八股文》
 date: 2026-07-13
 tags: [Agent, AI, Schema]
 excerpt: 对Schema的个人理解，Schema就像大侠出招前必须填写的“投名状”，规定了参数名、类型、是否必填、取值范围。
-@author: SANIKKI
+author: SANIKKI
 cover: ''
 updated: 2026-07-13
 ---

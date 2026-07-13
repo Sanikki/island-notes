@@ -31,7 +31,14 @@ function parseFrontmatter(raw: string, slug: string): Post {
   let meta: Record<string, unknown> = {};
   let body = raw;
   if (match) {
-    meta = (yaml.load(match[1]) as Record<string, unknown>) || {};
+    try {
+      meta = (yaml.load(match[1]) as Record<string, unknown>) || {};
+    } catch (err) {
+      // 单篇文章 frontmatter 写错（如误用 YAML 保留字符 @、`）时，
+      // 仅丢弃该篇元数据、保留正文，避免整站文章模块崩溃白屏。
+      console.warn(`[posts] 解析 "${slug}" 的 frontmatter 失败，已忽略其元数据：`, err);
+      meta = {};
+    }
     body = raw.slice(match[0].length);
   }
   const tags = Array.isArray(meta.tags) ? (meta.tags as unknown[]).map(String) : [];

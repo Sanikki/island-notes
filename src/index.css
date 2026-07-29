@@ -12,7 +12,7 @@
   --ai-cream: #fff9e6;
   --ai-radius: 18px;
   --ai-shadow: 0 6px 0 rgba(91, 74, 58, 0.12), 0 10px 24px rgba(91, 74, 58, 0.12);
-  --ai-maxw: 1100px;
+  --ai-maxw: 1500px;
 
   /* —— 覆盖 animal-island-ui 库主题，统一成官方站风格 —— */
   --animal-primary-color: #19c8b9;
@@ -791,12 +791,32 @@ a {
 /* 表格 */
 .markdown-body .md-table-wrap {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 520px;
   margin: 1.1em 0;
+  /* 底部淡出提示：表格内容超出时暗示还有更多 */
+  background:
+    linear-gradient(var(--ai-card) 70%, transparent) 0 100% / 100% 40px no-repeat,
+    var(--ai-card);
+  /* 让滚动条不太突兀 */
+  scrollbar-width: thin;
+}
+.markdown-body .md-table-wrap::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.markdown-body .md-table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+.markdown-body .md-table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(123, 191, 106, 0.35);
+  border-radius: 3px;
 }
 
 .markdown-body table {
   border-collapse: collapse;
-  width: 100%;
+  min-width: 100%;
+  width: auto;
   background: #fffdf6;
   border-radius: 12px;
   overflow: hidden;
@@ -808,6 +828,7 @@ a {
   border: 1px solid rgba(123, 191, 106, 0.35);
   padding: 9px 14px;
   text-align: left;
+  white-space: nowrap;
 }
 
 .markdown-body th {

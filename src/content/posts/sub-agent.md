@@ -7,6 +7,7 @@ author: SANIKKI
 cover: ''
 updated: 2026-07-29
 ---
+
 > ****大侠追一个 Bug，追着追着翻了 30 个文件，聊了 60 轮。回头一看，**最初要修什么来着？**
 >
 > 江湖经验：修 Bug 的时候，高手都会**另开一个终端**去追踪调用链。查完了，终端一关，结论记在纸上，回到原来的终端继续修。
@@ -144,28 +145,36 @@ return extract_text(messages[-1]["content"])  # 只取最后一条消息的文�
 > **Sub-agent = 新终端 + 干净脑 + 限制工具 + 只回结论。隔离的不是文件，是上下文。工具少不是残废，是专注。** 🏔️
 >
 
-### 📋</font> Sub-Agent 隔离与治理决策表| 优先级</font> | 决策</font> | 选择</font> | 原因</font> | 如果不使用这种决策，会出现什么问题</font> |
+### 📋 Sub-Agent 隔离与治理决策表
+| 优先级 | 决策 | 选择 | 原因 | 如果不使用这种决策，会出现什么问题 |
 | --- | --- | --- | --- | --- |
-| **P0</font>** | **上下文隔离</font>** | 全新</font> </font>`messages[]</font>` | 子 Agent 的中间过程不污染主 Agent 的上下文</font> | 如果不只传回结论，可能会导致传回无用信息（如检索到的原文噪音、失败的尝试记录），挤爆主 Agent 的上下文窗口，并干扰其综合判断。</font> |
-| | **安全策略不跳过</font>** | 子 Agent 工具调用也走</font> </font>`PreToolUse</font>`<br/> </font>hook</font> | 上下文隔离不代表权限隔离</font> | 如果跳过子 Agent 的安全钩子校验，攻击者可能通过子 Agent 间接发起非法工具调用（如</font> </font>`shell_exec</font>`<br/>、</font>`file_delete</font>`<br/>），绕过主 Agent 的权限管控，造成严重的数据泄露或系统破坏。</font> |
-| | **强制超时熔断</font>** | 子 Agent 执行设置硬超时（如 30s），超时直接返回空或错误状态</font> | 防止单篇文档读取或外部 API 卡死，将故障隔离在单个子任务内</font> | 如果不设超时，遇到外部依赖阻塞时，主 Agent 会</font>**无限期挂起等待</font>**，导致工作流线程池被耗尽，所有用户请求集体超时，引发级联雪崩。</font> |
-| | **返回前 Schema 校验</font>** | 在子 Agent 输出最终 JSON 前，强制校验必填字段（如</font> </font>`core_answer</font>`<br/>）是否存在且非空</font> | 防止子 Agent 因幻觉输出空对象或非标准格式，导致主 Agent 解析层直接崩溃</font> | 如果不做格式校验，子 Agent 可能返回</font> </font>`{"思考": "我读完了"}</font>`<br/> </font>这种纯文本字典，主 Agent 尝试取</font> </font>`core_answer</font>`<br/> </font>字段时直接抛</font> </font>`KeyError</font>`<br/> </font>或解析异常，导致交互中断。</font> |
-| **P1</font>** | **只回传结论</font>** | `extract_text(last_message)</font>` | 不是回传整个</font> </font>`messages</font>`<br/> </font>列表</font> | 如果回传整个 messages 列表，主 Agent 会看到子 Agent 的内部推理链（CoT）、工具调用日志及中间报错，导致主 Agent “想太多”或被虚假错误信息误导，最终答非所问。</font> |
-| | **禁止递归</font>** | 子 Agent 无</font> </font>`task</font>`<br/> </font>工具</font> | 防止子 Agent 再 spawn 新的子 Agent</font> | 如果不禁用（即子 Agent 拥有派发任务权限），可能引发无限递归或指数级任务扩散（如子 Agent 为解决一个小问题再生成 5 个孙 Agent），导致任务永远无法结束，Token 消耗失控。</font> |
-| | **任务粒度控制</font>** | 小任务（如翻译一句话、算个加减法）由主 Agent 直接处理，</font>**不创建</font>**子 Agent</font> | 子 Agent 的启动开销极大（状态初始化、Prompt 加载、连接池占用），大炮打蚊子得不偿失</font> | 如果任何任务都无脑起子 Agent，高频轻量请求的响应时间会从</font> </font>**50ms 飙升至 2s+</font>**，系统吞吐量呈指数级下降，GPU 资源被无效调度占满。</font> |
-| | **工具集精简（最小权限）</font>** | 仅挂载当前任务必需的 tools（如仅挂载</font> </font>`read_pdf</font>`<br/>），剔除搜索/计算等无关工具</font> | 减少子 Agent 的决策空间，既能降低 Token 消耗，又能防止误操作</font> | 如果给子 Agent 挂载了全量工具，它可能在文档里找不到答案时，</font>**擅自调用浏览器搜索或执行系统命令</font>**来“曲线救国”，既浪费大量 Token，又极易产生失控的幻觉输出。</font> |
-| | **错误隔音与降级</font>** | 子 Agent 抛异常时</font> </font>`catch</font>`<br/> </font>住，返回标准化</font> </font>`{"error": "xxx"}</font>`<br/> </font>JSON，主 Agent 走 Fallback 逻辑</font> | 一个子 Agent 读崩了，不影响其他并行的子 Agent 结果，也不中断主流程</font> | 如果子 Agent 直接往上抛异常，3 个任务中任意一个读崩（如文件损坏），会导致</font>**整个主流程直接中断</font>**，用户什么回答都收不到，且难以定位具体是哪个环节出了问题。</font> |
+| **P0** | **上下文隔离** | 全新 `messages[]` | 子 Agent 的中间过程不污染主 Agent 的上下文 | 如果不只传回结论，可能会导致传回无用信息（如检索到的原文噪音、失败的尝试记录），挤爆主 Agent 的上下文窗口，并干扰其综合判断。 |
+| | **安全策略不跳过** | 子 Agent 工具调用也走 `PreToolUse`<br/> hook | 上下文隔离不代表权限隔离 | 如果跳过子 Agent 的安全钩子校验，攻击者可能通过子 Agent 间接发起非法工具调用（如 `shell_exec`<br/>、`file_delete`<br/>），绕过主 Agent 的权限管控，造成严重的数据泄露或系统破坏。 |
+| | **强制超时熔断** | 子 Agent 执行设置硬超时（如 30s），超时直接返回空或错误状态 | 防止单篇文档读取或外部 API 卡死，将故障隔离在单个子任务内 | 如果不设超时，遇到外部依赖阻塞时，主 Agent 会**无限期挂起等待**，导致工作流线程池被耗尽，所有用户请求集体超时，引发级联雪崩。 |
+| | **返回前 Schema 校验** | 在子 Agent 输出最终 JSON 前，强制校验必填字段（如 `core_answer`<br/>）是否存在且非空 | 防止子 Agent 因幻觉输出空对象或非标准格式，导致主 Agent 解析层直接崩溃 | 如果不做格式校验，子 Agent 可能返回 `{"思考": "我读完了"}`<br/> 这种纯文本字典，主 Agent 尝试取 `core_answer`<br/> 字段时直接抛 `KeyError`<br/> 或解析异常，导致交互中断。 |
+| **P1** | **只回传结论** | `extract_text(last_message)` | 不是回传整个 `messages`<br/> 列表 | 如果回传整个 messages 列表，主 Agent 会看到子 Agent 的内部推理链（CoT）、工具调用日志及中间报错，导致主 Agent “想太多”或被虚假错误信息误导，最终答非所问。 |
+| | **禁止递归** | 子 Agent 无 `task`<br/> 工具 | 防止子 Agent 再 spawn 新的子 Agent | 如果不禁用（即子 Agent 拥有派发任务权限），可能引发无限递归或指数级任务扩散（如子 Agent 为解决一个小问题再生成 5 个孙 Agent），导致任务永远无法结束，Token 消耗失控。 |
+| | **任务粒度控制** | 小任务（如翻译一句话、算个加减法）由主 Agent 直接处理，**不创建**子 Agent | 子 Agent 的启动开销极大（状态初始化、Prompt 加载、连接池占用），大炮打蚊子得不偿失 | 如果任何任务都无脑起子 Agent，高频轻量请求的响应时间会从 **50ms 飙升至 2s+**，系统吞吐量呈指数级下降，GPU 资源被无效调度占满。 |
+| | **工具集精简（最小权限）** | 仅挂载当前任务必需的 tools（如仅挂载 `read_pdf`<br/>），剔除搜索/计算等无关工具 | 减少子 Agent 的决策空间，既能降低 Token 消耗，又能防止误操作 | 如果给子 Agent 挂载了全量工具，它可能在文档里找不到答案时，**擅自调用浏览器搜索或执行系统命令**来“曲线救国”，既浪费大量 Token，又极易产生失控的幻觉输出。 |
+| | **错误隔音与降级** | 子 Agent 抛异常时 `catch`<br/> 住，返回标准化 `{"error": "xxx"}`<br/> JSON，主 Agent 走 Fallback 逻辑 | 一个子 Agent 读崩了，不影响其他并行的子 Agent 结果，也不中断主流程 | 如果子 Agent 直接往上抛异常，3 个任务中任意一个读崩（如文件损坏），会导致**整个主流程直接中断**，用户什么回答都收不到，且难以定位具体是哪个环节出了问题。 |
 
 
 ---
 
-### 🚦</font> 分级实施策略速查| 优先级</font> | 定位</font> | 实施方式</font> | 失败后果</font> |
+### 🚦 分级实施策略速查
+| 优先级 | 定位 | 实施方式 | 失败后果 |
 | --- | --- | --- | --- |
-| **P0</font>** | **系统红线</font>** | 写在</font> </font>**Orchestrator 编排代码</font>**中，Sub-Agent 无法绕过</font> | **生产事故</font>**（服务崩溃/安全漏洞/数据泄露）</font> |
-| **P1</font>** | **工程优化</font>** | 写在</font> </font>**System Prompt 顶层指令</font>** </font>+</font> </font>**日志监控告警</font>** | **性能劣化</font>**（耗时增加/费用飙升/偶发幻觉）</font> |
+| **P0** | **系统红线** | 写在 **Orchestrator 编排代码**中，Sub-Agent 无法绕过 | **生产事故**（服务崩溃/安全漏洞/数据泄露） |
+| **P1** | **工程优化** | 写在 **System Prompt 顶层指令** + **日志监控告警** | **性能劣化**（耗时增加/费用飙升/偶发幻觉） |
 
 
 ---
 
-### 💡</font> 上线前检查建议按 P0 → P1 的顺序依次确认，P0 项</font>**全部通过</font>**才允许上线：
-+ **P0-1</font>** 主 Agent 传给子 Agent 的是否是全新的空 </font>`messages[]</font>`（而非克隆历史）？+ **P0-2</font>** 子 Agent 的工具调用是否被 </font>`PreToolUse</font>` 钩子拦截校验？+ **P0-3</font>** 子 Agent 执行是否有硬超时拦截器（</font>`asyncio.timeout</font>` 或 </font>`threading.Timer</font>`）？+ **P0-4</font>** 子 Agent 输出后是否有 JSON Schema 校验器检查必填字段？+ **P1-1 ~ P1-5</font>** 子 Agent 的 System Prompt 是否包含了“禁止递归”、“不要输出推理链”、“小任务禁止创建子任务”等指令？</font>
+### 💡 上线前检查建议
+按 P0 → P1 的顺序依次确认，P0 项**全部通过**才允许上线：
+
++ **P0-1** 主 Agent 传给子 Agent 的是否是全新的空 `messages[]`（而非克隆历史）？
++ **P0-2** 子 Agent 的工具调用是否被 `PreToolUse` 钩子拦截校验？
++ **P0-3** 子 Agent 执行是否有硬超时拦截器（`asyncio.timeout` 或 `threading.Timer`）？
++ **P0-4** 子 Agent 输出后是否有 JSON Schema 校验器检查必填字段？
++ **P1-1 ~ P1-5** 子 Agent 的 System Prompt 是否包含了"禁止递归"、"不要输出推理链"、"小任务禁止创建子任务"等指令？

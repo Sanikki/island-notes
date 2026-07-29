@@ -829,6 +829,13 @@ a {
   padding: 9px 14px;
   text-align: left;
   white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* 首列（优先级列）水平居中 */
+.markdown-body td:first-child,
+.markdown-body th:first-child {
+  text-align: center;
 }
 
 .markdown-body th {
